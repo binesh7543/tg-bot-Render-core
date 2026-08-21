@@ -1,34 +1,21 @@
+
 const express = require('express');
 const { Bot, webhookCallback } = require('grammy');
+const { processIncomingMessage } = require('./idChecker');
 
 const app = express();
 app.use(express.json());
 
-// Telegram Bot Init
 const bot = new Bot(process.env.BOT_TOKEN);
 
-// Jab bhi user message bheje -> Hello World reply
 bot.on('message', async (ctx) => {
-  await ctx.reply('Hello World! 🌎🌍');
+  await processIncomingMessage(ctx);
 });
 
-// Render Health Check URL
-app.get('/', (req, res) => {
-  res.send('Bot Server is Running Perfectly!');
-});
-
-// Telegram Webhook Route
 app.use('/webhook', webhookCallback(bot, 'express'));
 
-// Server Start
+app.get('/', (req, res) => res.send('Router Server Active'));
+
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
-  
-  if (process.env.RENDER_EXTERNAL_URL) {
-    const webhookUrl = `${process.env.RENDER_EXTERNAL_URL}/webhook`;
-    await bot.api.setWebhook(webhookUrl);
-    console.log(`Webhook set to: ${webhookUrl}`);
-  }
-});
+app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
